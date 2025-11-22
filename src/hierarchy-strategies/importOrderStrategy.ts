@@ -244,6 +244,51 @@ export class ImportOrderStrategy implements IHierarchyStrategy {
     );
   }
 
+  // Find a matching tab path by comparing path suffixes
+  // This handles worktrees, symlinks, and other path mismatches
+  private findMatchingTabPath(
+    resolvedPath: string,
+    tabPaths: Set<string>,
+  ): string | undefined {
+    // First try exact match
+    if (tabPaths.has(resolvedPath)) {
+      return resolvedPath;
+    }
+
+    // Split paths into segments for suffix comparison
+    const resolvedSegments = resolvedPath.split(path.sep);
+
+    let bestMatch: string | undefined;
+    let bestMatchLength = 0;
+
+    for (const tabPath of tabPaths) {
+      const tabSegments = tabPath.split(path.sep);
+
+      // Compare from the end (suffix matching)
+      let matchLength = 0;
+      const minLength = Math.min(resolvedSegments.length, tabSegments.length);
+
+      for (let i = 1; i <= minLength; i++) {
+        const resolvedSeg = resolvedSegments[resolvedSegments.length - i];
+        const tabSeg = tabSegments[tabSegments.length - i];
+
+        if (resolvedSeg === tabSeg) {
+          matchLength++;
+        } else {
+          break;
+        }
+      }
+
+      // Require at least filename + one directory to avoid false matches
+      if (matchLength >= 2 && matchLength > bestMatchLength) {
+        bestMatchLength = matchLength;
+        bestMatch = tabPath;
+      }
+    }
+
+    return bestMatch;
+  }
+
   private calculateImportScores(
     tabs: readonly vscode.Tab[],
   ): Map<string, number> {
@@ -260,10 +305,16 @@ export class ImportOrderStrategy implements IHierarchyStrategy {
       incomingCount.set(filePath, 0);
     }
 
-    for (const [importer, imports] of Object.entries(this.importGraph)) {
+    // Build a map from resolved import paths to actual tab paths
+    const resolvedToTabPath = new Map<string, string>();
+
+    for (const [, imports] of Object.entries(this.importGraph)) {
       for (const imported of imports) {
-        if (incomingCount.has(imported)) {
-          incomingCount.set(imported, (incomingCount.get(imported) || 0) + 1);
+        // Use suffix matching to find the corresponding tab
+        const matchingTab = this.findMatchingTabPath(imported, tabPaths);
+        if (matchingTab) {
+          resolvedToTabPath.set(imported, matchingTab);
+          incomingCount.set(matchingTab, (incomingCount.get(matchingTab) || 0) + 1);
         }
       }
     }
@@ -285,19 +336,21 @@ export class ImportOrderStrategy implements IHierarchyStrategy {
       const imports = this.importGraph[current] || new Set();
 
       for (const imported of imports) {
-        if (!tabPaths.has(imported)) {
+        // Map resolved import to actual tab path
+        const matchingTab = resolvedToTabPath.get(imported);
+        if (!matchingTab) {
           continue;
         }
 
-        const newCount = (incomingCount.get(imported) || 1) - 1;
-        incomingCount.set(imported, newCount);
+        const newCount = (incomingCount.get(matchingTab) || 1) - 1;
+        incomingCount.set(matchingTab, newCount);
 
         // Update depth to be max of current depth + 1
-        const existingDepth = depths.get(imported) || 0;
-        depths.set(imported, Math.max(existingDepth, currentDepth + 1));
+        const existingDepth = depths.get(matchingTab) || 0;
+        depths.set(matchingTab, Math.max(existingDepth, currentDepth + 1));
 
         if (newCount === 0) {
-          queue.push(imported);
+          queue.push(matchingTab);
         }
       }
     }
