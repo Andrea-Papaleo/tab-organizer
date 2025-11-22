@@ -4,18 +4,55 @@
   "description": "Organize open editor tabs based on hierarchy",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.106.1"
+    "vscode": "^1.105.1"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "taborganizer.helloWorld",
-        "title": "Hello World"
+        "command": "tabOrganizer.organize",
+        "title": "Organize Tabs by Hierarchy"
+      },
+      {
+        "command": "tabOrganizer.toggleAutoOrganize",
+        "title": "Toggle Auto-Organize Tabs"
+      },
+      {
+        "command": "tabOrganizer.setStrategy",
+        "title": "Tab Organizer: Set Sorting Strategy"
+      }
+    ],
+    "configuration": {
+      "title": "Tab Organizer",
+      "properties": {
+        "tabOrganizer.autoOrganize": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically organize tabs when they change"
+        },
+        "tabOrganizer.sortStrategy": {
+          "type": "string",
+          "enum": [
+            "fileSystem",
+            "imports",
+            "alphabetical"
+          ],
+          "default": "fileSystem",
+          "description": "Strategy for organizing tabs"
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "tabOrganizer.organize",
+        "key": "ctrl+shift+o",
+        "mac": "cmd+shift+o"
       }
     ]
   },
