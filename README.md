@@ -1,51 +1,67 @@
-# taborganizer README
+# Tab Organizer
 
-This is the README for your extension "taborganizer". After writing up a brief description, we recommend including the following sections.
+Organize your open editor tabs based on different hierarchical strategies.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+### Multiple Sorting Strategies
 
-For example if there is an image subfolder under your extension project workspace:
+- **File System**: Sort tabs by directory structure depth, keeping related files together
+- **Import Order**: Sort tabs by import dependencies - files that import others come first, creating a logical flow from entry points to utilities
+- **Alphabetical**: Simple alphabetical sorting by filename
 
-\!\[feature X\]\(images/feature-x.png\)
+### Commands
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- **Organize Tabs by Hierarchy** (`Ctrl+Shift+O` / `Cmd+Shift+O`): Manually organize all open tabs
+- **Toggle Auto-Organize Tabs**: Enable/disable automatic organization when tabs change
+- **Tab Organizer: Set Sorting Strategy**: Quickly switch between sorting strategies via a picker
 
-## Requirements
+### Smart Import Resolution
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+The Import Order strategy intelligently resolves:
+- ES6 imports (`import { x } from './file'`)
+- CommonJS requires (`require('./file')`)
+- Dynamic imports (`import('./file')`)
+- Path aliases from tsconfig.json/jsconfig.json (e.g., `@/components`)
+
+Works correctly with git worktrees and symlinked directories through suffix path matching.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+- `tabOrganizer.autoOrganize`: Enable/disable automatic tab organization when tabs change (default: `false`)
+- `tabOrganizer.sortStrategy`: Strategy for organizing tabs - `fileSystem`, `imports`, or `alphabetical` (default: `fileSystem`)
+- `tabOrganizer.aliasConfigFiles`: Config files to check for path aliases (default: `["tsconfig.json", "tsconfig.app.json", "tsconfig.node.json", "jsconfig.json"]`)
+
+### Example Configuration
+
+```json
+{
+  "tabOrganizer.autoOrganize": true,
+  "tabOrganizer.sortStrategy": "imports",
+  "tabOrganizer.aliasConfigFiles": [
+    "tsconfig.json",
+    "tsconfig.app.json"
+  ]
+}
+```
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- Import resolution only works for files that are open as tabs
+- The Import Order strategy requires files to be saved to detect imports (unsaved changes are not analyzed)
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.0.1
 
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+Initial release:
+- File System, Import Order, and Alphabetical sorting strategies
+- Configurable alias config files for path resolution
+- Support for git worktrees and symlinked directories
+- Auto-organize option
+- Quick strategy picker command
 
 ---
 
@@ -53,19 +69,6 @@ Added features X, Y, and Z.
 
 Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+- [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
 
 **Enjoy!**
