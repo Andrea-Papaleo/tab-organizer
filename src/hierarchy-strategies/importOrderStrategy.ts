@@ -129,13 +129,9 @@ export class ImportOrderStrategy implements IHierarchyStrategy {
       return;
     }
 
-    // Try tsconfig.json first, then jsconfig.json
-    const configFiles = [
-      "tsconfig.json",
-      "tsconfig.app.json",
-      "tsconfig.node.json",
-      "jsconfig.json",
-    ];
+    // Get config files from settings
+    const config = vscode.workspace.getConfiguration("tabOrganizer");
+    const configFiles = config.get<string[]>("aliasConfigFiles") || [];
     const fs = require("fs");
 
     for (const configFile of configFiles) {
