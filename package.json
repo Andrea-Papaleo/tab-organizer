@@ -2,6 +2,8 @@
   "name": "taborganizer",
   "displayName": "TabOrganizer",
   "description": "Organize open editor tabs based on hierarchy",
+  "publisher": "andreapapaleo",
+  "repository": "https://github.com/Andrea-Papaleo/tab-organizer",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.105.1"
